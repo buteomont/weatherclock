@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="C:/Documents and Settings/David/Desktop/weatherclock.jar"/>
+<options buildIfNeeded="true" compress="true" descriptionLocation="/Weather Clock/weatherclock.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" useSourceFolders="false"/>
+<manifest generateManifest="true" mainClassHandleIdentifier="=Weather Clock/&lt;free.david.wc{WeatherTime.java[WeatherTime" manifestLocation="/Weather Clock/manifest" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
+<sealing sealJar="false">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+<file path="/Weather Clock/countryCodes.ini"/>
+<javaElement handleIdentifier="=Weather Clock/&lt;free.david.weather"/>
+<file path="/Weather Clock/defaults.ini"/>
+<javaElement handleIdentifier="=Weather Clock/&lt;free.david.wc"/>
+<file path="/Weather Clock/METARdefaults.ini"/>
+<javaElement handleIdentifier="=Weather Clock/&lt;"/>
+<file path="/Weather Clock/METARstations.txt"/>
+</selectedElements>
+</jardesc>

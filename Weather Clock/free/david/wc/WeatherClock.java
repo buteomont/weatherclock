@@ -40,6 +40,7 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
 	private boolean outFetching			=false;
 	private String[] imageURLList;
 	private boolean randomImage			=false;
+	private boolean drawMiniMoon		=true;
 
 //    public static final long NEW_MOON_DATE=3:12 on dec 31,2005
     public static final float MOON_MONTH=29.5306f;//synodic month is 29.5306 days
@@ -578,13 +579,15 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
     
     private void moonFace(Graphics2D g, boolean fullFace)
         {
+        if (!fullFace && !isDrawMiniMoon())
+        	return;
         g.setColor(getFaceColor());
 		int width=getWidth();
 		int height=getHeight();
         int w=getBezelWidth();
         int xOffset=0;
         int yOffset=0;
-        if (!fullFace)
+        if (!fullFace) //draw mini-moon?
         	{
         	width/=10;
         	height/=10;
@@ -997,6 +1000,19 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
 	public void setRandomImage(boolean randomImage)
 		{
 		this.randomImage=randomImage;
+		}
+
+	public void setDrawMiniMoon(boolean drawMiniMoon)
+		{
+		this.drawMiniMoon=drawMiniMoon;
+		}
+
+	/**
+	 * @return Returns the drawMiniMoon.
+	 */
+	public boolean isDrawMiniMoon()
+		{
+		return drawMiniMoon;
 		}
 
 //  /* (non-Javadoc)

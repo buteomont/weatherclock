@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jardesc>
-<jar path="weatherclock.jar"/>
+<jar path="Weather Clock/weatherclock.jar"/>
 <options buildIfNeeded="true" compress="true" descriptionLocation="/Weather Clock/weatherclock.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" useSourceFolders="false"/>
 <manifest generateManifest="true" mainClassHandleIdentifier="=Weather Clock/&lt;free.david.wc{WeatherTime.java[WeatherTime" manifestLocation="/Weather Clock/manifest" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
 <sealing sealJar="false">

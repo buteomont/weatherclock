@@ -39,7 +39,10 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 	private JLabel urlLabel = null;
 	private String selectedImageURL="";
 	private boolean randomImage=false;
-	
+	private JPanel centerPanel = null;
+	private JPanel dblClickPanel = null;
+	private JLabel dblClickLabel = null;
+	private JTextField dblClickTextField = null;
 	public FaceMenu()
 		{
 		super();
@@ -117,16 +120,25 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 			String key=(String)i.nextElement();
 			if (key.startsWith("imageChoice"))
 				{
-				String face=props.getProperty(key);
+				String line=props.getProperty(key);
+				String face=null;
 				String faceName=null;
-				int urlEnd=face.indexOf(" ");
+				String gotoURL=null;
+				int urlEnd=line.indexOf(" "); //URL of image
+				int gotoEnd=line.indexOf(" ",urlEnd+1); //URL of link on image
 				if (urlEnd>0) 
 					{
-					faceName=face.substring(urlEnd).trim();
-					face=face.substring(0, urlEnd);
+					faceName=line.substring(urlEnd).trim();//may change below
+					face=line.substring(0, urlEnd); 
 					}
-				else faceName=face; //use the URL if no name given
-				m=new FaceRadioButtonMenuItem(faceName, face);
+				else faceName=line; //use the URL if no name given
+				if (gotoEnd>urlEnd && line.substring(urlEnd, gotoEnd).startsWith("http:"))
+					{
+					gotoURL=line.substring(urlEnd, gotoEnd);
+					faceName=line.substring(gotoEnd).trim();
+					}
+				else gotoURL=getProps().getProperty("DEFAULT_GOTO_URL");
+				m=new FaceRadioButtonMenuItem(faceName, face, gotoURL);
 				currentMenu.add(m);
 				getImageGroup().add(m);
 				m.addActionListener(this);
@@ -221,7 +233,7 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 		if (newImagejDialog==null)
 			{
 			newImagejDialog=new JDialog();
-			newImagejDialog.setSize(new java.awt.Dimension(267,128));
+			newImagejDialog.setSize(new java.awt.Dimension(267,201));
 			newImagejDialog.setModal(true);
 			newImagejDialog.setTitle("Add New Image");
 			newImagejDialog.setContentPane(getNewImageDialog());
@@ -240,9 +252,8 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 			{
 			newImageDialog=new JPanel();
 			newImageDialog.setLayout(new BorderLayout());
-			newImageDialog.add(getNamePanel(), java.awt.BorderLayout.NORTH);
-			newImageDialog.add(getUrlPanel(), java.awt.BorderLayout.CENTER);
 			newImageDialog.add(getOkPanel(), java.awt.BorderLayout.SOUTH);
+			newImageDialog.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
 			}
 		return newImageDialog;
 		}
@@ -280,14 +291,15 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 					//get the url
 					String newName=getNewImageNameTextField().getText();
 					String newURL=getNewImageTextField().getText();
+					String newGoto=getDblClickTextField().getText();
 					if (newURL!=null && newURL.length()>10)
 						{
 						somethingEntered=true;
 						//add it to the properties object
-						addChoiceToProps(newName, newURL);
+						addChoiceToProps(newName, newURL, newGoto);
 						
 						//add it to the menu and select it
-						addNewMenuItem(newName, newURL);
+						addNewMenuItem(newName, newURL, newGoto);
 						
 						//use the new image
 						setSelectedImageURL(newURL);
@@ -312,7 +324,7 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 		return newImageOKButton;
 		}
 
-	private void addChoiceToProps(String newName, String newURL)
+	private void addChoiceToProps(String newName, String newURL, String newGoto)
 		{
 		String entryName=null;
 		for (Iterator names=getProps().keySet().iterator();names.hasNext();)
@@ -321,9 +333,11 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 			if (name.startsWith("imageChoice"))
 				{
 				String val=getProps().getProperty(name);
-				if (val.indexOf(" ")>0)
+				if (val.indexOf(" ")>0) //has a name?
 					{
 					val=val.substring(val.indexOf(" ")).trim();
+					if (val.indexOf(" ")>0) //has a goto URL?
+						val=val.substring(val.indexOf(" ")).trim();
 					if (val.equals(newName))
 						entryName=name;
 					}
@@ -331,7 +345,7 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 			}
 		if (entryName==null) //it's not already there, make a new one
 			entryName="imageChoice"+getNextNumber("imageChoice");
-		getProps().put(entryName, newURL+" "+newName);
+		getProps().put(entryName, newURL+" "+newGoto+" "+newName);
 		}
 	
 	protected int getNextNumber(String baseName)
@@ -430,7 +444,7 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 		return okPanel;
 		}
 
-	private void addNewMenuItem(String newName, String newURL)
+	private void addNewMenuItem(String newName, String newURL, String newGotoURL)
 		{
 		FaceRadioButtonMenuItem item=null;
 		for (Enumeration buttons=getImageGroup().getElements();buttons.hasMoreElements();)
@@ -441,12 +455,13 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 				{
 				item=(FaceRadioButtonMenuItem)button;
 				item.setFaceURL(newURL);
+				item.setGotoURL(newGotoURL);
 				break;
 				}
 			}
 		if (item==null)
 			{
-			item=new FaceRadioButtonMenuItem(newName, newURL);
+			item=new FaceRadioButtonMenuItem(newName, newURL, newGotoURL);
 			item.addActionListener(this);
 			item.setActionCommand("faceImage");
 			getImageGroup().add(item);
@@ -487,6 +502,58 @@ public class FaceMenu extends JMenu implements ActionListener, PropertyChangeLis
 	public void setRandomImage(boolean randomImage)
 		{
 		this.randomImage=randomImage;
+		}
+
+	/**
+	 * This method initializes centerPanel	
+	 * 	
+	 * @return javax.swing.JPanel	
+	 */
+	private JPanel getCenterPanel()
+		{
+		if (centerPanel==null)
+			{
+			centerPanel=new JPanel();
+			centerPanel.add(getNamePanel(), null);
+			centerPanel.add(getUrlPanel(), null);
+			centerPanel.add(getDblClickPanel(), null);
+			centerPanel.add(getDblClickTextField(), null);
+			}
+		return centerPanel;
+		}
+
+	/**
+	 * This method initializes dblClickPanel	
+	 * 	
+	 * @return javax.swing.JPanel	
+	 */
+	private JPanel getDblClickPanel()
+		{
+		if (dblClickPanel==null)
+			{
+			dblClickLabel = new JLabel();
+			dblClickLabel.setText("Go to:");
+			dblClickLabel.setToolTipText("Go to this URL when the clock is double-clicked.");
+			dblClickPanel=new JPanel();
+			dblClickPanel.add(dblClickLabel, null);
+			}
+		return dblClickPanel;
+		}
+
+	/**
+	 * This method initializes dblClickTextField	
+	 * 	
+	 * @return javax.swing.JTextField	
+	 */
+	private JTextField getDblClickTextField()
+		{
+		if (dblClickTextField==null)
+			{
+			dblClickTextField=new JTextField();
+			dblClickTextField.setPreferredSize(new java.awt.Dimension(180,20));
+			dblClickTextField.setToolTipText("Go to this URL when the clock is double-clicked.");
+			}
+		return dblClickTextField;
 		}
 
 	}

@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import java.util.Properties;
 
 import javax.swing.*;
 
@@ -12,6 +11,7 @@ import free.david.weather.Weather;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.JCheckBoxMenuItem;
 
 public class WeatherTime extends JFrame implements ActionListener, WeatherListener
 	{
@@ -33,6 +33,7 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 	private CityMenu cityMenu = null;
 	private boolean redirect=true; //redirect standard out to file by defalult
 	private MRUMenu recentMenu = null;
+	private JCheckBoxMenuItem showMiniMoonCheckBoxMenuItem = null;
 	
 	public WeatherTime() throws HeadlessException
 		{
@@ -167,6 +168,30 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 			recentMenu.addActionListener(this);
 			}
 		return recentMenu;
+		}
+
+	/**
+	 * This method initializes showMiniMoonCheckBoxMenuItem	
+	 * 	
+	 * @return javax.swing.JCheckBoxMenuItem	
+	 */
+	private JCheckBoxMenuItem getShowMiniMoonCheckBoxMenuItem()
+		{
+		if (showMiniMoonCheckBoxMenuItem==null)
+			{
+			showMiniMoonCheckBoxMenuItem=new JCheckBoxMenuItem();
+			showMiniMoonCheckBoxMenuItem.setText("Show Mini-Moon");
+			showMiniMoonCheckBoxMenuItem.setSelected(true);
+			showMiniMoonCheckBoxMenuItem.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+					getWeatherClock().setDrawMiniMoon(showMiniMoonCheckBoxMenuItem.isSelected());
+					getWeatherClock().setFaceValid(false);
+					}
+				});
+			}
+		return showMiniMoonCheckBoxMenuItem;
 		}
 
 	/**
@@ -372,6 +397,7 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 			chooseMenu.add(getCountryMenu());
 			chooseMenu.add(getStateMenu());
 			chooseMenu.add(getCityMenu());
+			chooseMenu.add(getShowMiniMoonCheckBoxMenuItem());
 			}
 		return chooseMenu;
 		}

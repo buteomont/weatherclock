@@ -5,6 +5,7 @@ import javax.swing.*;
 public class FaceRadioButtonMenuItem extends JRadioButtonMenuItem
 	{
 	private String faceURL="";
+	private String gotoURL="";
 	
 	public FaceRadioButtonMenuItem()
 		{
@@ -16,10 +17,11 @@ public class FaceRadioButtonMenuItem extends JRadioButtonMenuItem
 		super(text);
 		}
 
-	public FaceRadioButtonMenuItem(String text, String faceURL)
+	public FaceRadioButtonMenuItem(String text, String faceURL, String gotoURL)
 		{
 		super(text);
 		setFaceURL(faceURL);
+		setGotoURL(gotoURL);
 		}
 
 	public String getFaceURL()
@@ -30,6 +32,22 @@ public class FaceRadioButtonMenuItem extends JRadioButtonMenuItem
 	public void setFaceURL(String faceURL)
 		{
 		this.faceURL=faceURL;
+		}
+
+	/**
+	 * @return Returns the gotoURL.
+	 */
+	public String getGotoURL()
+		{
+		return gotoURL;
+		}
+
+	/**
+	 * @param gotoURL The gotoURL to set.
+	 */
+	public void setGotoURL(String gotoURL)
+		{
+		this.gotoURL=gotoURL;
 		}
 
 	}

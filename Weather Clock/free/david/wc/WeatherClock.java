@@ -1,8 +1,7 @@
 package free.david.wc;
 
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.event.*;
 import java.awt.geom.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,7 +11,9 @@ import java.util.List;
 import free.david.weather.MetarWeather;
 import free.david.weather.Weather;
 
-public class WeatherClock extends Clock implements WeatherListener, ComponentListener//, HyperlinkListener
+public class WeatherClock extends Clock implements WeatherListener,
+												ComponentListener,
+												MouseListener
     {
     private static final long serialVersionUID=809703545713396433L;
     private Weather weather             =null;
@@ -41,6 +42,10 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
 	private String[] imageURLList;
 	private boolean randomImage			=false;
 	private boolean drawMiniMoon		=true;
+	private Rectangle miniMoonArea	=sizeMiniMoon();
+	private boolean draggingMiniMoon	=false;
+	private int dragMoonOffsetX			=0;
+	private int dragMoonOffsetY			=0;
 
 //    public static final long NEW_MOON_DATE=3:12 on dec 31,2005
     public static final float MOON_MONTH=29.5306f;//synodic month is 29.5306 days
@@ -51,7 +56,15 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
         initialize();
         }
 
-    public WeatherClock(Properties specifics)
+    private Rectangle sizeMiniMoon()
+		{
+		return new Rectangle((int)(getWidth()*.9)/2,
+							 (int)(getHeight()*.9)/3,
+							 getWidth()/10,
+							 getHeight()/10);
+		}
+
+	public WeatherClock(Properties specifics)
         {
         super();
         this.settings=specifics;
@@ -102,9 +115,8 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
             }
         this.add(getMoon(), null);
         addComponentListener(this);
+        addMouseListener(this);
         getWeather().start();
-
-//        addHyperlinkListener(this);
         }
 
     /**
@@ -467,6 +479,12 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
             g.setColor(Color.RED);
             g.drawString("!", (getWidth()/2)-(g.getFontMetrics().charWidth('!')/2), getHeight()/3);
             }
+        //redraw the minimoon if it is outside the bezel
+        if (!new Ellipse2D.Double(0,0,getWidth(),getHeight()).contains(getMiniMoonArea()))
+        	{
+        	g.setClip(null); //clear clipping area
+        	moonFace((Graphics2D)g, false);
+        	}
         }
 
     protected void drawFace(Graphics2D g)
@@ -589,11 +607,16 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
         int yOffset=0;
         if (!fullFace) //draw mini-moon?
         	{
-        	width/=10;
-        	height/=10;
+//        	width/=10;
+//        	height/=10;
+//        	w=0;
+//        	xOffset=(getWidth()-width)/2;
+//        	yOffset=(getHeight()-height)/3;
+        	width=getMiniMoonArea().width;
+        	height=getMiniMoonArea().height;
         	w=0;
-        	xOffset=(getWidth()-width)/2;
-        	yOffset=(getHeight()-height)/3;
+        	xOffset=getMiniMoonArea().x;
+        	yOffset=getMiniMoonArea().y;
         	}
         float age=calculateMoonAge();
         Color color1=getFaceColor();
@@ -843,10 +866,17 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
 
     public void componentResized(ComponentEvent e)
         {
+        updateMiniMoon();
         setFaceValid(false);
         }
 
-    public void componentShown(ComponentEvent e){} //who cares
+    private void updateMiniMoon()
+		{
+		setMiniMoonArea(sizeMiniMoon());
+		
+		}
+
+	public void componentShown(ComponentEvent e){} //who cares
 
     public void setFaceColor(Color faceColor)
         {
@@ -1013,6 +1043,54 @@ public class WeatherClock extends Clock implements WeatherListener, ComponentLis
 	public boolean isDrawMiniMoon()
 		{
 		return drawMiniMoon;
+		}
+
+	/**
+	 * @return Returns the miniMoonArea.
+	 */
+	public Rectangle getMiniMoonArea()
+		{
+		return miniMoonArea;
+		}
+
+	/**
+	 * @param miniMoonArea The miniMoonArea to set.
+	 */
+	public void setMiniMoonArea(Rectangle miniMoonArea)
+		{
+		this.miniMoonArea=miniMoonArea;
+		}
+
+	public void mouseClicked(MouseEvent e){}
+
+	public void mouseEntered(MouseEvent e){}
+
+	public void mouseExited(MouseEvent e){}
+
+	public void mousePressed(MouseEvent e)
+		{
+		int mousex=e.getPoint().x;
+		int mousey=e.getPoint().y;
+		Rectangle moon=getMiniMoonArea();
+		dragMoonOffsetX=mousex-moon.x;
+		dragMoonOffsetY=mousey-moon.y;
+		draggingMiniMoon=	mousex >=moon.x &&
+							mousex <=(moon.x+moon.width) &&
+							mousey >=moon.y &&
+							mousey <=(moon.y+moon.height);
+		}
+
+	public void mouseReleased(MouseEvent e)
+		{
+		if (draggingMiniMoon)
+			{
+			getMiniMoonArea().x=Math.max(0,e.getPoint().x-dragMoonOffsetX);
+			getMiniMoonArea().y=Math.max(0,e.getPoint().y-dragMoonOffsetY);
+			getMiniMoonArea().x=Math.min(getWidth()-getMiniMoonArea().width,getMiniMoonArea().x);
+			getMiniMoonArea().y=Math.min(getHeight()-getMiniMoonArea().height,getMiniMoonArea().y);
+			setFaceValid(false);
+			}
+		
 		}
 
 //  /* (non-Javadoc)

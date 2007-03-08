@@ -13,7 +13,8 @@ import free.david.weather.Weather;
 
 public class WeatherClock extends Clock implements WeatherListener,
 												ComponentListener,
-												MouseListener
+												MouseListener,
+												MouseMotionListener
     {
     private static final long serialVersionUID=809703545713396433L;
     private Weather weather             =null;
@@ -42,10 +43,14 @@ public class WeatherClock extends Clock implements WeatherListener,
 	private String[] imageURLList;
 	private boolean randomImage			=false;
 	private boolean drawMiniMoon		=true;
-	private Rectangle miniMoonArea	=sizeMiniMoon();
+	private Rectangle miniMoonArea		=null;
 	private boolean draggingMiniMoon	=false;
 	private int dragMoonOffsetX			=0;
 	private int dragMoonOffsetY			=0;
+	private int oldHeight				=0;
+	private int oldWidth				=0;
+	private int newHeight				=0;
+	private int newWidth				=0;
 
 //    public static final long NEW_MOON_DATE=3:12 on dec 31,2005
     public static final float MOON_MONTH=29.5306f;//synodic month is 29.5306 days
@@ -58,10 +63,21 @@ public class WeatherClock extends Clock implements WeatherListener,
 
     private Rectangle sizeMiniMoon()
 		{
-		return new Rectangle((int)(getWidth()*.9)/2,
-							 (int)(getHeight()*.9)/3,
-							 getWidth()/10,
-							 getHeight()/10);
+		if (oldWidth<=0 || oldHeight<=0)
+			return new Rectangle((int)(getWidth()*.9)/2,
+					(int)(getHeight()*.9)/3,
+						getWidth()/10,
+						getHeight()/10);
+		else
+			{
+			Rectangle oldMM=getMiniMoonArea();
+			double xFactor=(double)getWidth()/oldWidth;
+			double yFactor=(double)getHeight()/oldHeight;
+			return new Rectangle((int)(oldMM.x*xFactor),
+								 (int)(oldMM.y*yFactor),
+								 getWidth()/10,
+								 getHeight()/10);
+			}
 		}
 
 	public WeatherClock(Properties specifics)
@@ -116,6 +132,7 @@ public class WeatherClock extends Clock implements WeatherListener,
         this.add(getMoon(), null);
         addComponentListener(this);
         addMouseListener(this);
+        addMouseMotionListener(this);
         getWeather().start();
         }
 
@@ -607,11 +624,6 @@ public class WeatherClock extends Clock implements WeatherListener,
         int yOffset=0;
         if (!fullFace) //draw mini-moon?
         	{
-//        	width/=10;
-//        	height/=10;
-//        	w=0;
-//        	xOffset=(getWidth()-width)/2;
-//        	yOffset=(getHeight()-height)/3;
         	width=getMiniMoonArea().width;
         	height=getMiniMoonArea().height;
         	w=0;
@@ -632,7 +644,6 @@ public class WeatherClock extends Clock implements WeatherListener,
         setFaceColor(color1);
 
        	super.drawFace(g);
-//g.setClip(null);
         Shape originalClip=g.getClip();
         if (!fullFace)
         	{
@@ -866,6 +877,10 @@ public class WeatherClock extends Clock implements WeatherListener,
 
     public void componentResized(ComponentEvent e)
         {
+        oldHeight=newHeight;
+        oldWidth=newWidth;
+        newWidth=getWidth();
+        newHeight=getHeight();
         updateMiniMoon();
         setFaceValid(false);
         }
@@ -1082,6 +1097,12 @@ public class WeatherClock extends Clock implements WeatherListener,
 
 	public void mouseReleased(MouseEvent e)
 		{
+		setMiniMoonLocation(e);
+		draggingMiniMoon=false;
+		}
+
+	private void setMiniMoonLocation(MouseEvent e)
+		{
 		if (draggingMiniMoon)
 			{
 			getMiniMoonArea().x=Math.max(0,e.getPoint().x-dragMoonOffsetX);
@@ -1090,6 +1111,20 @@ public class WeatherClock extends Clock implements WeatherListener,
 			getMiniMoonArea().y=Math.min(getHeight()-getMiniMoonArea().height,getMiniMoonArea().y);
 			setFaceValid(false);
 			}
+		}
+
+	public void mouseDragged(MouseEvent e)
+		{
+		if (draggingMiniMoon)
+			{
+			setMiniMoonLocation(e);
+			repaint();
+			}
+		}
+
+	public void mouseMoved(MouseEvent e)
+		{
+		// TODO Auto-generated method stub
 		
 		}
 

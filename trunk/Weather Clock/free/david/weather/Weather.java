@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import free.david.Collectable;
 import free.david.wc.WeatherListener;
 
-public abstract class Weather extends Thread
+public abstract class Weather extends Thread implements Collectable
 	{
 	private List	listeners		=new Vector();
 	protected String	city	="Nashville International Airport";	// the city being watched
@@ -652,5 +653,11 @@ public abstract class Weather extends Thread
 		{
 		return Math.exp(21.564d - 5420d/temperature);
 		}
-	
+
+	public void collectSettings(Properties settings)
+		{
+		try{settings.put("country",getCountry());}catch (Exception e){e.printStackTrace();}
+		try{settings.put("state",getStateName());}catch (Exception e){e.printStackTrace();}
+		try{settings.put("city",getCity());}catch (Exception e){e.printStackTrace();}
+		}	
 	}

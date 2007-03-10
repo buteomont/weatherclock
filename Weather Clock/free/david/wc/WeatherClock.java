@@ -8,10 +8,12 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 
+import free.david.Collectable;
 import free.david.weather.MetarWeather;
 import free.david.weather.Weather;
 
 public class WeatherClock extends Clock implements WeatherListener,
+												Collectable,
 												ComponentListener,
 												MouseListener,
 												MouseMotionListener
@@ -51,6 +53,7 @@ public class WeatherClock extends Clock implements WeatherListener,
 	private int oldWidth				=0;
 	private int newHeight				=0;
 	private int newWidth				=0;
+	private boolean ready			=false; //set by parent container
 
 //    public static final long NEW_MOON_DATE=3:12 on dec 31,2005
     public static final float MOON_MONTH=29.5306f;//synodic month is 29.5306 days
@@ -63,21 +66,34 @@ public class WeatherClock extends Clock implements WeatherListener,
 
     private Rectangle sizeMiniMoon()
 		{
-		if (oldWidth<=0 || oldHeight<=0)
-			return new Rectangle((int)(getWidth()*.9)/2,
+		Rectangle r=null;
+		if (oldWidth<=0 || oldHeight<=0) //must be the first time here
+			{
+			r= new Rectangle((int)(getWidth()*.9)/2,
 					(int)(getHeight()*.9)/3,
 						getWidth()/10,
 						getHeight()/10);
+			if (getMiniMoonArea()!=null)
+				{
+				r.x=getMiniMoonArea().x;
+				r.y=getMiniMoonArea().y;
+				}
+			}
 		else
 			{
 			Rectangle oldMM=getMiniMoonArea();
 			double xFactor=(double)getWidth()/oldWidth;
 			double yFactor=(double)getHeight()/oldHeight;
-			return new Rectangle((int)(oldMM.x*xFactor),
-								 (int)(oldMM.y*yFactor),
-								 getWidth()/10,
-								 getHeight()/10);
+			r= new Rectangle((int)(oldMM.x*xFactor),
+							 (int)(oldMM.y*yFactor),
+							 getWidth()/10,
+							 getHeight()/10);
 			}
+		System.out.println("getWidth()="+getWidth());
+		System.out.println("getHeight()="+getHeight());
+		System.out.println("X="+r.x);
+		System.out.println("Y="+r.y);
+		return r;	
 		}
 
 	public WeatherClock(Properties specifics)
@@ -130,6 +146,16 @@ public class WeatherClock extends Clock implements WeatherListener,
             setFaceValid(false);
             }
         this.add(getMoon(), null);
+        String miniMoonX=settings.getProperty("miniMoonXPosition");
+        String miniMoonY=settings.getProperty("miniMoonYPosition");
+        if (miniMoonX!=null && miniMoonY!=null)
+        	{
+        	Rectangle mm=sizeMiniMoon();
+        	mm.x=Integer.parseInt(miniMoonX);
+        	mm.y=Integer.parseInt(miniMoonY);
+        	setMiniMoonArea(mm);
+        	}
+        
         addComponentListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -877,12 +903,15 @@ public class WeatherClock extends Clock implements WeatherListener,
 
     public void componentResized(ComponentEvent e)
         {
-        oldHeight=newHeight;
-        oldWidth=newWidth;
-        newWidth=getWidth();
-        newHeight=getHeight();
-        updateMiniMoon();
-        setFaceValid(false);
+        if ((getWidth()!=newWidth || getHeight()!=newHeight) && isReady())
+        	{
+	        oldHeight=newHeight;
+	        oldWidth=newWidth;
+	        newWidth=getWidth();
+	        newHeight=getHeight();
+	        updateMiniMoon();
+	        setFaceValid(false);
+        	}
         }
 
     private void updateMiniMoon()
@@ -1126,6 +1155,24 @@ public class WeatherClock extends Clock implements WeatherListener,
 		{
 		// TODO Auto-generated method stub
 		
+		}
+
+	public boolean isReady()
+		{
+		return ready;
+		}
+
+	public void setReady(boolean initialized)
+		{
+		this.ready=initialized;
+		}
+
+	public void collectSettings(Properties settings)
+		{
+		getWeather().collectSettings(settings);
+		try{settings.put("imageURL",getImageURL());}catch (Exception e){e.printStackTrace();}
+		try{settings.put("miniMoonXPosition",getMiniMoonArea().x+"");}catch (Exception e){e.printStackTrace();}
+		try{settings.put("miniMoonYPosition",getMiniMoonArea().y+"");}catch (Exception e){e.printStackTrace();}
 		}
 
 //  /* (non-Javadoc)

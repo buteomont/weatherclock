@@ -242,6 +242,7 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 		
 		getWeatherClock().setImageURLList(getFaceMenu().getAllImageURLs());
 		newTitle();
+		getWeatherClock().setReady(true);
 		}
 
 	private void loadProperties()
@@ -313,11 +314,8 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 		try{specifics.put("height", getHeight()+"");}catch (Exception e){e.printStackTrace();}
 		try{specifics.put("xPosition", getLocation().x+"");}catch (Exception e){e.printStackTrace();}
 		try{specifics.put("yPosition", getLocation().y+"");}catch (Exception e){e.printStackTrace();}
-		try{specifics.put("country",getWeatherClock().getWeather().getCountry());}catch (Exception e){e.printStackTrace();}
-		try{specifics.put("state",getWeatherClock().getWeather().getStateName());}catch (Exception e){e.printStackTrace();}
-		try{specifics.put("city",getWeatherClock().getWeather().getCity());}catch (Exception e){e.printStackTrace();}
-		try{specifics.put("imageURL",getWeatherClock().getImageURL());}catch (Exception e){e.printStackTrace();}
-
+		getWeatherClock().collectSettings(specifics);
+		
 		try
 			{
 			FileOutputStream out = new FileOutputStream("weatherclock.ini");

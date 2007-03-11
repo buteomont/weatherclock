@@ -55,9 +55,6 @@ public class WeatherClock extends Clock implements WeatherListener,
 	private int newWidth				=0;
 	private boolean ready			=false; //set by parent container
 
-//    public static final long NEW_MOON_DATE=3:12 on dec 31,2005
-    public static final float MOON_MONTH=29.5306f;//synodic month is 29.5306 days
-
     public WeatherClock()
         {
         super();
@@ -467,43 +464,11 @@ public class WeatherClock extends Clock implements WeatherListener,
             }
         if (weather.getRemarks()!=null && !weather.getRemarks().startsWith("WCI") && !weather.getRemarks().startsWith("VSB") && weather.getRemarks().length()>0)
             buf.append("<br>").append(weather.getRemarks());
-        buf.append("<br>There is a ").append(getMoonType()).append(" moon.");
+        buf.append("<br>There is a ").append(getMoon().getMoonType()).append(" moon.");
         buf.append("<br><div align=right><small><small>Fetched at ").append(updateTime).append("</small></small></div>");
         buf.append("</html>");
         setToolTipText(buf.toString());
         }
-
-    private String getMoonType()
-        {
-        float age=calculateMoonAge();
-        float phase=MOON_MONTH/32;
-        if (age<phase*2 || age>phase*30) return "new";
-        else if (age<phase*7) return "waxing crescent";
-        else if (age<phase*9) return "first quarter";
-        else if (age<phase*14) return "waxing gibbous";
-        else if (age<phase*18) return "full";
-        else if (age<phase*23) return "waning gibbous";
-        else if (age<phase*25) return "last quarter";
-        else if (age<phase*30) return "waning crescent";
-        else return "";
-        }
-
-    /**
-     * Calculate the moon phase.  This algorithm is based on the fact
-     * that there was a new moon on December 31, 2005.
-     *
-     * @return int representing percentage of moon illuminated. (0-100)
-     */
-    public float calculateMoonAge()
-        {
-        Calendar newMoon=Calendar.getInstance();
-        newMoon.clear();
-        newMoon.set(2005,11,31,03,12,00); //update if we find more accurate data
-        Calendar today=Calendar.getInstance();
-        float diff=(float)(today.getTimeInMillis()-newMoon.getTimeInMillis())/86400000.0f;//convert to days
-        return diff%MOON_MONTH; //synodic month is 29.5306 days
-        }
-
 
     public void paint(Graphics g)
         {
@@ -656,11 +621,11 @@ public class WeatherClock extends Clock implements WeatherListener,
         	xOffset=getMiniMoonArea().x;
         	yOffset=getMiniMoonArea().y;
         	}
-        float age=calculateMoonAge();
+        float age=getMoon().calculateMoonAge();
         Color color1=getFaceColor();
         Color color2=getFaceColor().brighter();
         Color originalColor=getFaceColor();
-        float qm=MOON_MONTH/4;
+        float qm=Moon.MOON_MONTH/4;
         int quarter=qm>age?1:qm*2>age?2:qm*3>age?3:4;
         if (quarter==1 || quarter==4)
             {
@@ -680,7 +645,7 @@ public class WeatherClock extends Clock implements WeatherListener,
         	g.fillRect(xOffset, yOffset, width, height);
         	}
         g.setColor(color2);
-        int ovWidth=Math.abs((int)(Math.cos((age/MOON_MONTH)*(Math.PI*2d))*width));
+        int ovWidth=Math.abs((int)(Math.cos((age/Moon.MOON_MONTH)*(Math.PI*2d))*width));
         g.fillOval(xOffset+(width-ovWidth)/2,
             yOffset+w-1,
             ovWidth,
@@ -1153,8 +1118,6 @@ public class WeatherClock extends Clock implements WeatherListener,
 
 	public void mouseMoved(MouseEvent e)
 		{
-		// TODO Auto-generated method stub
-		
 		}
 
 	public boolean isReady()

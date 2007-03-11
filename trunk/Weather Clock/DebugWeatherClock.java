@@ -2,6 +2,7 @@ import java.awt.LayoutManager;
 import java.io.IOException;
 import java.util.Calendar;
 
+import free.david.wc.Moon;
 import free.david.wc.WeatherClock;
 import free.david.weather.Weather;
 
@@ -12,7 +13,7 @@ public class DebugWeatherClock extends WeatherClock
 
 	public float calculateMoonAge()
 		{
-		return moonAge%MOON_MONTH;
+		return moonAge%Moon.MOON_MONTH;
 		}
 
 	public DebugWeatherClock() throws IOException

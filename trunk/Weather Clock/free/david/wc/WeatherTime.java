@@ -549,17 +549,23 @@ public class WeatherTime extends JFrame implements ActionListener, WeatherListen
 			if (command.equalsIgnoreCase("moon"))
 				{
 				getWeatherClock().setFaceImage(false);
+				getShowMiniMoonCheckBoxMenuItem().setEnabled(false);
+				getWeatherClock().setDrawMiniMoon(false);
 				}
 			else if (command.equalsIgnoreCase("randomImage"))
 				{
 				getWeatherClock().setRandomImage(true);
 				getWeatherClock().setImageURLList(getFaceMenu().getAllImageURLs());
 				getWeatherClock().setFaceImage(true);
+				getShowMiniMoonCheckBoxMenuItem().setEnabled(true);
+				getWeatherClock().setDrawMiniMoon(getShowMiniMoonCheckBoxMenuItem().isSelected());
 				}
 			else
 				{
 				getWeatherClock().setImageURL(getFaceMenu().getSelectedImageURL());
 				getWeatherClock().setFaceImage(true);
+				getShowMiniMoonCheckBoxMenuItem().setEnabled(true);
+				getWeatherClock().setDrawMiniMoon(getShowMiniMoonCheckBoxMenuItem().isSelected());
 				}
 			getWeatherClock().setFaceValid(false);
 			getWeatherClock().repaint();
